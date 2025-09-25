@@ -6,7 +6,15 @@ const rateLimit = require('express-rate-limit');
 
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",  // local frontend
+    "https://customer-data-management-front-hle5s8iq8.vercel.app" // deployed frontend
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 app.use(express.json());
 
 const limiter = rateLimit({ windowMs: 60*1000, max: 100 });
