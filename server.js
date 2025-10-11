@@ -10,7 +10,7 @@ const app = express();
 // ✅ Dynamic allowed origins
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://customer-data-management-front-hle5s8iq8.vercel.app', // Vercel frontend
+  'https://customer-data-management-front-end.vercel.app', // Vercel frontend
   process.env.FRONTEND_URL // dynamic from Render env
 ].filter(Boolean);
 
