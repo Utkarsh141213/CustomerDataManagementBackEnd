@@ -6,38 +6,68 @@ const rateLimit = require('express-rate-limit');
 
 dotenv.config();
 const app = express();
-app.use(cors({
-  origin: [
-    "http://localhost:3000",  // local frontend
-    "https://customer-data-management-front-hle5s8iq8.vercel.app" // deployed frontend
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+
+// ✅ Dynamic allowed origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://customer-data-management-front-hle5s8iq8.vercel.app', // Vercel frontend
+  process.env.FRONTEND_URL // dynamic from Render env
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn('❌ Blocked by CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-const limiter = rateLimit({ windowMs: 60*1000, max: 100 });
+// ✅ Basic rate limiting
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: 'Too many requests, please try again later.',
+});
 app.use(limiter);
 
-// Connect DB
-mongoose.connect(process.env.MONGO_URI, { dbName: 'milkdairy' })
-  .then(()=> console.log('Mongo connected'))
-  .catch(err => { console.error(err); process.exit(1); });
+// ✅ MongoDB connection
+mongoose
+  .connect(process.env.MONGO_URI, {
+    dbName: 'milkdairy',
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('✅ MongoDB connected successfully'))
+  .catch((err) => {
+    console.error('❌ MongoDB connection failed:', err.message);
+    process.exit(1);
+  });
 
-// Models
-const Customer = require('./models/Customer');
-const Entry = require('./models/Entry');
-const Payment = require('./models/Payment');
+// ✅ Import models
+require('./models/Customer');
+require('./models/Entry');
+require('./models/Payment');
 
-// Routes (simple in-file for MVP)
-const authRouter = require('./routes/auth');
-const customersRouter = require('./routes/customers');
-const adminRouter = require('./routes/admin');
+// ✅ Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/customers', require('./routes/customers'));
+app.use('/api/admin', require('./routes/admin'));
 
-app.use('/api/auth', authRouter);
-app.use('/api/customers', customersRouter);
-app.use('/api/admin', adminRouter);
+// ✅ Health route (for Render/Vercel ping)
+app.get('/', (req, res) => {
+  res.status(200).send('Customer Data Management API is running 🚀');
+});
 
+// ✅ Start server
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, ()=> console.log(`Server listening ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
