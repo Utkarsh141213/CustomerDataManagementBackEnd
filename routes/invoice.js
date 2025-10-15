@@ -6,6 +6,9 @@ const vision = require("@google-cloud/vision");
 const Invoice = require("../models/Invoice");
 
 const router = express.Router();
+process.env.GOOGLE_APPLICATION_CREDENTIALS =
+  process.env.GOOGLE_APPLICATION_CREDENTIALS_PATH ||
+  "/opt/render/project/secrets/google-vision.json"; // default Render path
 
 // Google Cloud Vision client
 const client = new vision.ImageAnnotatorClient();
