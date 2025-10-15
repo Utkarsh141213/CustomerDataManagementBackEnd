@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
+
 dotenv.config();
 const app = express();
 
@@ -62,6 +63,7 @@ require('./models/Payment');
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/invoice', require('./routes/invoice'));
 
 // ✅ Health route (for Render/Vercel ping)
 app.get('/', (req, res) => {
