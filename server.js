@@ -4,9 +4,11 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
-
 dotenv.config();
 const app = express();
+
+// ✅ Tell Express to trust the proxy (important for Render/Vercel)
+app.set('trust proxy', 1); // <-- ADD THIS LINE
 
 // ✅ Dynamic allowed origins
 const allowedOrigins = [
