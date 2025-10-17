@@ -22,12 +22,18 @@ router.post("/upload", upload.single("invoice"), async (req, res) => {
     if (!vendorName) {
       // generate week-wise vendor name based on current week
       const today = new Date();
-      const day = today.getDay(); // 0=Sun ... 6=Sat
-      const diffToMonday = (day + 6) % 7;
+      const day = today.getDay();
+      const diffToMonday = (day) % 7;
       const weekStart = new Date(today);
-      weekStart.setDate(today.getDate() - diffToMonday);
-      weekStart.setHours(0, 0, 0, 0);
+     
+      
 
+      if (diffToMonday === 0) {
+         weekStart.setDate(today.getDate());
+      }else {
+          weekStart.setDate(today.getDate() - day);
+      }
+      weekStart.setHours(0, 0, 0, 0);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       weekEnd.setHours(23, 59, 59, 999);
